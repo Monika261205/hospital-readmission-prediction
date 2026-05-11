@@ -1,3 +1,5 @@
+## 🔗 Live Demo
+https://hospital-readmission-prediction-tgver58snstvmussfkf2d7.streamlit.app
 # 🏥 Hospital Readmission Risk Prediction
 
 This project predicts whether a patient is likely to be readmitted within 30 days using Machine Learning.
@@ -23,4 +25,4 @@ This project predicts whether a patient is likely to be readmitted within 30 day
 ## ▶ How to Run
 ```bash
 pip install -r requirements.txt
-streamlit run app.py
+streamlit run app.pyw
