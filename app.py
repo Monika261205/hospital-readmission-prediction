@@ -8,7 +8,37 @@ import numpy as np
 from reportlab.pdfgen import canvas
 from reportlab.lib.pagesizes import letter
 import io
+DEMO_MODE = True
+if DEMO_MODE == False:
 
+    if "logged_in" not in st.session_state:
+        st.session_state.logged_in = False
+
+    def login_page():
+        st.markdown("""
+        <div class="card">
+            <h1>🔐 Login Required</h1>
+            <p style="color:gray;">Enter credentials to access the dashboard.</p>
+        </div>
+        """, unsafe_allow_html=True)
+
+        username = st.text_input("Username")
+        password = st.text_input("Password", type="password")
+
+        correct_username = "admin"
+        correct_password = "admin123"
+
+        if st.button("Login"):
+            if username == correct_username and password == correct_password:
+                st.session_state.logged_in = True
+                st.success("Login successful!")
+                st.rerun()
+            else:
+                st.error("Invalid username or password!")
+
+    if not st.session_state.logged_in:
+        login_page()
+        st.stop()
 # ------------------- LOAD MODEL -------------------
 model = joblib.load("model/readmission_model.pkl")
 
@@ -67,37 +97,6 @@ div.stButton > button:hover {
 </style>
 """, unsafe_allow_html=True)
 
-
-# ------------------- LOGIN SYSTEM -------------------
-if "logged_in" not in st.session_state:
-    st.session_state.logged_in = False
-
-def login_page():
-    st.markdown("""
-    <div class="card">
-        <h1>🔐 Login Required</h1>
-        <p style="color:gray;">Enter credentials to access the dashboard.</p>
-    </div>
-    """, unsafe_allow_html=True)
-
-    username = st.text_input("Username")
-    password = st.text_input("Password", type="password")
-
-    # Change these credentials as you want
-    correct_username = "admin"
-    correct_password = "admin123"
-
-    if st.button("Login"):
-        if username == correct_username and password == correct_password:
-            st.session_state.logged_in = True
-            st.success("Login successful!")
-            st.rerun()
-        else:
-            st.error("Invalid username or password!")
-
-if not st.session_state.logged_in:
-    login_page()
-    st.stop()
 
 
 # ------------------- TITLE -------------------
