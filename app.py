@@ -8,37 +8,7 @@ import numpy as np
 from reportlab.pdfgen import canvas
 from reportlab.lib.pagesizes import letter
 import io
-DEMO_MODE = True
-if DEMO_MODE == False:
 
-    if "logged_in" not in st.session_state:
-        st.session_state.logged_in = False
-
-    def login_page():
-        st.markdown("""
-        <div class="card">
-            <h1>🔐 Login Required</h1>
-            <p style="color:gray;">Enter credentials to access the dashboard.</p>
-        </div>
-        """, unsafe_allow_html=True)
-
-        username = st.text_input("Username")
-        password = st.text_input("Password", type="password")
-
-        correct_username = "admin"
-        correct_password = "admin123"
-
-        if st.button("Login"):
-            if username == correct_username and password == correct_password:
-                st.session_state.logged_in = True
-                st.success("Login successful!")
-                st.rerun()
-            else:
-                st.error("Invalid username or password!")
-
-    if not st.session_state.logged_in:
-        login_page()
-        st.stop()
 # ------------------- LOAD MODEL -------------------
 model = joblib.load("model/readmission_model.pkl")
 
@@ -96,7 +66,6 @@ div.stButton > button:hover {
 }
 </style>
 """, unsafe_allow_html=True)
-
 
 
 # ------------------- TITLE -------------------
@@ -328,39 +297,27 @@ if st.sidebar.button("🔍 Predict Readmission Risk"):
         </div>
         """, unsafe_allow_html=True)
 
-    # ------------------- FEATURE IMPORTANCE -------------------
-st.subheader("⭐ Top Feature Importance (Model Explanation)")
+    # Feature importance
+    st.subheader("⭐ Top Feature Importance (Model Explanation)")
 
-try:
-    # If model is pipeline
-    if hasattr(model, "named_steps"):
-        rf_model = model.named_steps.get("model", model)
-    else:
-        rf_model = model
+    try:
+        rf_classifier = model.named_steps["model"]
+        feature_importance = rf_classifier.feature_importances_
 
-    feature_importance = rf_model.feature_importances_
+        ohe = model.named_steps["preprocessor"].named_transformers_["cat"].named_steps["onehot"]
+        cat_feature_names = ohe.get_feature_names_out()
 
-    # Since your model is trained on raw columns (not onehot pipeline),
-    # we will use the original dataset column names.
-    feature_names = list(input_data.columns)
+        all_feature_names = list(numeric_cols) + list(cat_feature_names)
 
-    importance_df = pd.DataFrame({
-        "Feature": feature_names,
-        "Importance": feature_importance
-    }).sort_values(by="Importance", ascending=False).head(10)
+        importance_df = pd.DataFrame({
+            "Feature": all_feature_names,
+            "Importance": feature_importance
+        }).sort_values(by="Importance", ascending=False).head(10)
 
-    st.dataframe(importance_df, use_container_width=True)
+        st.dataframe(importance_df, use_container_width=True)
 
-    # Plot importance chart
-    st.subheader("📌 Feature Importance Chart")
-
-    fig_imp, ax_imp = plt.subplots()
-    ax_imp.barh(importance_df["Feature"][::-1], importance_df["Importance"][::-1])
-    ax_imp.set_xlabel("Importance Score")
-    st.pyplot(fig_imp)
-
-except Exception as e:
-    st.warning("Feature importance not available. Model may not support it.")
+    except Exception:
+        st.warning("Feature importance not available in this model.")
 
     # Voice output section
     st.subheader("🔊 Voice Output")
